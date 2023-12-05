@@ -1,0 +1,400 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Scatter of Donut Charts with D3.js</title>
+    <script src="https://d3js.org/d3.v5.min.js"></script>
+    <style>
+        body {
+            font-family: 'Arial', sans-serif;
+            margin: 0;
+            opacity: 0;
+            /* Set initial opacity to 0 */
+            animation: fadeIn 2s ease-in-out forwards;
+        }
+
+        .tooltip {
+            position: absolute;
+            text-align: center;
+            padding: 10px;
+            background-color: #436fc8;
+            color: #fff;
+            border: 2px solid #345492;
+            border-radius: 8px;
+            pointer-events: none;
+            font-family: 'Arial', sans-serif;
+            font-size: 14px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.2);
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                /* Start with opacity 0 */
+            }
+
+            to {
+                opacity: 1;
+                /* End with opacity 1 */
+            }
+        }
+
+        #chart {
+            position: absolute;
+            top: 0;
+            left: 0;
+            object-fit: cover;
+            z-index: 3;
+        }
+
+        #background {
+            object-fit: cover;
+        }
+    </style>
+</head>
+
+<body>
+    <audio id="backgroundAudio" loop autoplay>
+        <source src="sandy-beach-calm-waves-water-nature-sounds-8052.mp3" type="audio/mp3">
+        Your browser does not support the audio tag.
+    </audio>
+
+    <video style="position: fixed; top: 0; width: 100%; height: 100%; z-index: -1;" id="background" autoplay playsinline
+        loop>
+        <source src="Untitled design.mp4" type="video/mp4">
+        Your browser does not support the video tag.
+    </video>
+
+    <div id='chart'>
+        <script>
+            const LeftURL = "globalHealth.html";
+            const RightURL = "QUALITY_OF_LIFE.html";
+            const PageTitle = "Education and Development";
+
+            const donutData = [
+                [0.9943181818, 0.7052186178, 0.700280112, 0.8333333333, 0.5524861878, 0.6858710562, 0.5457025921, 0.4076086957, 0.4059539919, -0.5442176871],
+                [0.3321470937, 0.4722550177, 0.2355712603, 0.5854800937, 0.1169590643, 0.5813953488, 0.2320185615, 0.1158748552, 0.2312138728, 0.2306805075],
+                [0.5509758687, 0.5608567483, 0.2950881607, 0.7213607396, 0.2971646893, 0.6540303725, 0.4021145264, 0.1006672259, 0.3625675535, 0.3285680148],
+                [0.1372419623, 0.4575713339, 0.1662175202, 0.3183604054, 0.1303946327, 0.3914731258, 0.1326346036, -0.02495964772, 0.1758185936, 0.1463617607],
+                [-3.948355454, -0.5740060885, -1.13941422, -3.956972381, -1.673803193, -2.540328215, -2.978607745, -1.498586015, -2.068223779, -2.096361609],
+                [-1.759395821, -1.346745861, -2.126671012, 5.206924887, 2.776507256, -1.49529579, -0.2636736968, -0.9763856185, 0.08925222982, -0.5395999922],
+                [2.244774923, -5.176912394, -3.851243392, 4.169829251, 1.835303152, -3.11555068, 0.01891535756, -4.920889138, 2.2142413, 3.482640738],
+                [0.1950451327, -3.186319817, -2.945858584, 4.718736163, 2.336208474, -2.249146541, -0.1281802562, -2.775970237, 1.076579555, 1.360701233]
+            ];
+
+            const textArray = [
+                "Human Develope Index",
+                "Global Literacy Rate",
+                "Global Female Adult Literacy Rate",
+                "Global Male Adult Literacy Rate",
+                "Gap between M&F Adult Literacy",
+                "% of Girls Not in Primary School",
+                "% of Boys Not in Primary School",
+                "% of Children Not in Primary School"
+            ];
+
+            const textPositions = [
+                { x: -289, y: 400, r: -20 },
+                { x: 450, y: 230, r: 30 },
+                { x: 310, y: -220, r: -10 },
+                { x: -590, y: 400, r: -44 },
+                { x: -430, y: -380, r: 47 },
+                { x: -870, y: -15, r: 0 },
+                { x: 600, y: -15, r: -1 },
+                { x: 100, y: -300, r: -15 }
+            ];
+
+            const ropeColor = [5, 3, 4, 2, -20, 0, -2, -1];
+
+            const ropePositions = [
+                { x: -400, y: 300, r: -20 },//1
+                { x: 450, y: 80, r: 30 },//2
+                { x: 280, y: -350, r: -10 },//3
+                { x: -730, y: 370, r: -45 },//4
+                { x: -350, y: -560, r: 48 },//5
+                { x: -850, y: -150, r: 0 },//6
+                { x: 550, y: -150, r: 0 },//7
+                { x: 20, y: -470, r: -15 },//8
+            ];
+
+            // Manually set the positions of each donut chart
+            const positions = [
+                { x: 0, y: 300 },
+                { x: 330, y: 190 },
+                { x: 220, y: -180 },
+                { x: -350, y: 200 },
+                { x: -220, y: -200 },
+                { x: -500, y: 0 },
+                { x: 500, y: 0 },
+                { x: 0, y: -280 }
+            ];
+
+            window.onload = function () {
+                const audio = document.getElementById('backgroundAudio');
+                audio.play();
+            };
+
+            // Set up the SVG dimensions
+            const width = Math.max(window.innerWidth, 1800);
+            const height = Math.max(window.innerHeight, 800);
+
+            // Create the SVG element
+            const svg = d3.select('body')
+                .append('svg')
+                .attr('width', width)
+                .attr('height', height)
+                .append('g')
+                .attr('transform', `translate(${width / 2},${height / 2})`); // Center the SVG
+
+            // Set up the color scale
+            const color = d3.scaleOrdinal(d3.schemeCategory10);
+            console.log(donutData)
+
+            const centerImage = svg.append('image')
+                .attr('xlink:href', 'boatman.png') // Set the path to your PNG image
+                .attr('width', 300) // Set the width of the image
+                .attr('height', 300) // Set the height of the image
+                .attr('x', -150) // Position the image at the center horizontally
+                .attr('y', -150)
+                .on('mouseover', function (d, i) {
+                    tooltip.transition()
+                        .duration(200)
+                        .style('opacity', .9);
+
+                    tooltip.html(`This donut chart represents growth percentages from the last year. Green segments indicate positive growth, red segments indicate a decline. The percentage value represents the extent of change.
+
+The color of the attached rope reflects the overall growth trend over the past 10 years. Green indicates positive growth, red suggests a decline.
+
+Hover for detailed information about each category's growth percentage.`)
+                        .style('left', (d3.event.pageX) + 'px')
+                        .style('top', (d3.event.pageY - 28) + 'px');
+
+
+                })
+                .on('mouseout', function (d) {
+                    tooltip.transition()
+                        .duration(500)
+                        .style('opacity', 0);
+                })
+                ; // Position the image at the center vertically
+            const Wooden = svg.append('image')
+                .attr('xlink:href', 'woodenPlank.png') // Set the path to your PNG image
+                .attr('width', 350) // Set the width of the image
+                .attr('height', 300) // Set the height of the image
+                .attr('x', -180) // Position the image at the center horizontally
+                .attr('y', 0); // Position the image at the center vertically
+
+            const button1 = svg.append('rect')
+                .attr('x', 76)
+                .attr('y', 127)
+                .attr('width', 40)
+                .attr('height', 40)
+                .attr('rx', 30) // Border-radius for rounded corners
+                .attr('fill', '#3399ff')
+                .on('click', function () {
+                    jumpToPage(RightURL);
+                });
+
+            const button2 = svg.append('rect')
+                .attr('x', -126)
+                .attr('y', 127)
+                .attr('width', 40)
+                .attr('height', 40)
+                .attr('rx', 30) // Border-radius for rounded corners
+                .attr('fill', '#3399ff')
+                .on('click', function () {
+                    jumpToPage(LeftURL);
+                });
+
+            svg.append('text')
+                .text("Education &")
+                .attr('x', -76) // Adjust the X position based on your layout
+                .attr('y', 145) // Adjust the Y position based on your layout
+                .style('font-weight', 'bold') // Set font weight to bold
+                .style('font-size', '22px');
+
+            svg.append('text')
+                .text("Development")
+                .attr('x', -76) // Adjust the X position based on your layout
+                .attr('y', 165) // Adjust the Y position based on your layout
+                .style('font-weight', 'bold') // Set font weight to bold
+                .style('font-size', '22px');
+
+            svg.append('text')
+                .text(">")
+                .attr('x', 90) // Adjust the X position based on your layout
+                .attr('y', 155) // Adjust the Y position based on your layout
+                .style('font-weight', 'bold') // Set font weight to bold
+                .style('font-size', '22px').on('click', function () {
+                    jumpToPage(RightURL);
+                }).attr('stroke', 'white') // Border color
+                .attr('stroke-width', '1'); // Border width;
+
+            svg.append('text')
+                .text("<")
+                .attr('x', -112) // Adjust the X position based on your layout
+                .attr('y', 155) // Adjust the Y position based on your layout
+                .style('font-weight', 'bold') // Set font weight to bold
+                .style('font-size', '22px').on('click', function () {
+                    jumpToPage(LeftURL);
+                }).attr('stroke', 'white') // Border color
+                .attr('stroke-width', '1');
+
+
+
+
+            function determineRopeColor(i) {
+                if (ropeColor[i] >= 0) {
+                    return 'greenRope.png'; // Return this color if the value is non-negative
+                }
+                else {
+                    return 'redRope.png'; // Return this color if the value is negative
+                }
+            }
+
+
+            for (let i = 0; i < ropePositions.length; i++) {
+                svg.append('image')
+                    .attr('xlink:href', determineRopeColor(i)) // Set the path to your PNG image
+                    .attr('width', 300) // Set the width of the image
+                    .attr('height', 300) // Set the height of the image
+                    .attr('x', ropePositions[i].x) // Position the image at the center horizontally
+                    .attr('y', ropePositions[i].y)
+                    .attr('transform', 'rotate(' + ropePositions[i].r + ',' + ropePositions[i].x + ',' + ropePositions[i].y + ')');
+            }
+
+
+
+
+            for (let i = 0; i < textPositions.length; i++) {
+                if (textArray[i] == "Gap between M&F Adult Literacy") {
+                    svg.append('text')
+                        .text("Gap between M&F")
+                        .attr('fill', 'white') // Text color
+                        .attr('x', textPositions[i].x) // Adjust the X position based on your layout
+                        .attr('y', textPositions[i].y) // Adjust the Y position based on your layout
+                        .style('font-weight', 'bold') // Set font weight to bold
+                        .style('font-size', '18px')
+                        .attr('transform', 'rotate(' + textPositions[i].r + ',' + textPositions[i].x + ',' + textPositions[i].y + ')')
+                        .attr('stroke', 'black') // Border color
+                        .attr('stroke-width', '.2');
+
+                    svg.append('text')
+                        .text("Adult Literacy")
+                        .attr('fill', 'white') // Text color
+                        .attr('x', textPositions[i].x) // Adjust the X position based on your layout
+                        .attr('y', textPositions[i].y + 20) // Adjust the Y position based on your layout
+                        .style('font-weight', 'bold') // Set font weight to bold
+                        .style('font-size', '18px')
+                        .attr('transform', 'rotate(' + textPositions[i].r + ',' + textPositions[i].x + ',' + textPositions[i].y + ')')
+                        .attr('stroke', 'black') // Border color
+                        .attr('stroke-width', '.2');
+
+                } // Set font size (adjust as needed);
+                else {
+                    svg.append('text')
+                    .text(textArray[i])
+                    .attr('fill', 'white') // Text color
+                    .attr('x', textPositions[i].x) // Adjust the X position based on your layout
+                    .attr('y', textPositions[i].y) // Adjust the Y position based on your layout
+                    .style('font-weight', 'bold') // Set font weight to bold
+                    .style('font-size', '18px')
+                    .attr('transform', 'rotate(' + textPositions[i].r + ',' + textPositions[i].x + ',' + textPositions[i].y + ')')
+                    .attr('stroke', 'black') // Border color
+                    .attr('stroke-width', '.2');
+                }
+            }
+
+
+            // Set up the radius for each donut chart
+            const donutRadius = 45;
+
+            // Generate the pie chart
+            const pie = data => d3.pie().sort(null)(data);
+            const arc = d3.arc()
+                .innerRadius(d => donutRadius)
+                .outerRadius(d => donutRadius + 45);
+
+            // Draw the scatter of donut charts
+            const donutGroups = svg.selectAll('donutGroup')
+                .data(donutData)
+                .enter()
+                .append('g')
+                .attr('class', 'donutGroup')
+                .attr('transform', (d, i) => `translate(${positions[i].x},${positions[i].y})`);
+
+            let count = 0;
+            function determineColor(i) {
+
+                const value = donutData[count][i]
+                console.log(count, i, value)
+                if (i == donutData[0].length - 1) {
+                    count += 1; // Return this color if the value is non-negative
+                }
+                if (value >= 0) {
+                    return '#C1FF72'; // Return this color if the value is non-negative
+                }
+                else {
+                    return '#DA5C73'; // Return this color if the value is negative
+                }
+            }
+
+            donutGroups.selectAll('path')
+                .data(d => pie(d.map(Math.abs))) // Use absolute values
+                .enter()
+                .append('path')
+                .attr('fill', (d, i) => determineColor(i))
+                .attr('d', arc)
+                .attr('stroke', 'black') // Set the border color to black
+                .attr('stroke-width', 2)
+                .on('mouseover', function (d, i) {
+                    tooltip.transition()
+                        .duration(200)
+                        .style('opacity', .9);
+
+                    const sectionValue = d.data;
+                    tooltip.html(`growth % from last year ${i + 2011}: ${sectionValue}`)
+                        .style('left', (d3.event.pageX) + 'px')
+                        .style('top', (d3.event.pageY - 28) + 'px');
+                })
+                .on('mouseout', function (d) {
+                    tooltip.transition()
+                        .duration(500)
+                        .style('opacity', 0);
+                })
+                ; // Set the border width
+
+
+            // Add tooltips
+            const tooltip = d3.select('body').append('div')
+                .attr('class', 'tooltip')
+                .style('opacity', 0);
+
+
+            donutGroups.on('mouseout', function (d) {
+                tooltip.transition()
+                    .duration(500)
+                    .style('opacity', 0);
+            });
+
+            //combined tool tips
+            // donutGroups.on('mouseover', function (d, i) {
+            //     tooltip.transition()
+            //         .duration(200)
+            //         .style('opacity', .9);
+            //     tooltip.html(`Donut Chart ${i + 1}`)
+            //         .style('left', (d3.event.pageX) + 'px')
+            //         .style('top', (d3.event.pageY - 28) + 'px');
+            // });
+
+            function jumpToPage(targetPageUrl) {
+                window.location.href = targetPageUrl;
+            }
+        </script>
+    </div>
+
+</body>
+
+</html>
