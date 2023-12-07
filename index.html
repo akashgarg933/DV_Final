@@ -328,6 +328,18 @@ Hover for detailed information about each category's growth percentage.`)
                 }
             }
 
+            function determineSign(i) {
+                // console.log(i)
+                if (i == '#C1FF72') {
+                    return '+'; // Return this color if the value is non-negative
+                }
+                else {
+                    return '-'; // Return this color if the value is negative
+                }
+            }
+
+            
+
             donutGroups.selectAll('path')
                 .data(d => pie(d.map(Math.abs))) // Use absolute values
                 .enter()
@@ -342,7 +354,7 @@ Hover for detailed information about each category's growth percentage.`)
                         .style('opacity', .9);
 
                     const sectionValue = d.data;
-                    tooltip.html(`growth % from last year ${i + 2011}: ${sectionValue}`)
+                    tooltip.html(`Year-over-Year growth in ${i + 2011}: ${determineSign(d3.select(this).attr("fill"))}${sectionValue}%`)
                         .style('left', (d3.event.pageX) + 'px')
                         .style('top', (d3.event.pageY - 28) + 'px');
                 })
