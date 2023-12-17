@@ -145,15 +145,15 @@
             };
 
             function scrollToCenter() {
-    const centerX = window.innerWidth / 2;
-    const centerY = window.innerHeight / 2;
-    
-    window.scrollTo({
-        top: centerY,
-        left: centerX,
-        behavior: 'smooth' // Optional: Add smooth scrolling effect
-    });
-}
+                const centerX = window.innerWidth / 2;
+                const centerY = window.innerHeight / 2;
+
+                window.scrollTo({
+                    top: centerY,
+                    left: centerX,
+                    behavior: 'smooth' // Optional: Add smooth scrolling effect
+                });
+            }
 
             // Set up the SVG dimensions
             const width = Math.max(window.innerWidth, 1800);
@@ -199,7 +199,22 @@ Hover for detailed information about each category's growth percentage.`)
                 })
                 ; // Position the image at the center vertically
 
+            const Legend = svg.append('image')
+                .attr('xlink:href', 'legend.png') // Set the path to your PNG image
+                .attr('width', 300) // Set the width of the image
+                .attr('height', 300) // Set the height of the image
+                .attr('x', 570) // Position the image at the center horizontally
+                .attr('y', 30)
+                ; // Position the image at the center vertically
 
+            const Time = svg.append('image')
+                .attr('xlink:href', 'Time.png') // Set the path to your PNG image
+                .attr('width', 450) // Set the width of the image
+                .attr('height', 450) // Set the height of the image
+                .attr('x', -30) // Position the image at the center horizontally
+                .attr('y', 88)
+                .attr('transform', 'rotate(90)'); // Rotate the image by 45 degrees around the center
+            ; // Position the image at the center vertically
 
             const Wooden = svg.append('image')
                 .attr('xlink:href', 'woodenPlank.png') // Set the path to your PNG image
@@ -338,7 +353,7 @@ Hover for detailed information about each category's growth percentage.`)
                 }
             }
 
-            
+
 
             donutGroups.selectAll('path')
                 .data(d => pie(d.map(Math.abs))) // Use absolute values

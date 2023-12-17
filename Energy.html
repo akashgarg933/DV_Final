@@ -180,6 +180,23 @@ Hover for detailed information about each category's growth percentage.`)
                 })
                 ; // Position the image at the center vertically
 
+            const Legend = svg.append('image')
+                .attr('xlink:href', 'legend.png') // Set the path to your PNG image
+                .attr('width', 300) // Set the width of the image
+                .attr('height', 300) // Set the height of the image
+                .attr('x', 570) // Position the image at the center horizontally
+                .attr('y', 30)
+                ; // Position the image at the center vertically
+
+            const Time = svg.append('image')
+                .attr('xlink:href', 'Time.png') // Set the path to your PNG image
+                .attr('width', 450) // Set the width of the image
+                .attr('height', 450) // Set the height of the image
+                .attr('x', -30) // Position the image at the center horizontally
+                .attr('y', 88)
+                .attr('transform', 'rotate(90)'); // Rotate the image by 45 degrees around the center
+            ; // Position the image at the center vertically
+
             const Wooden = svg.append('image')
                 .attr('xlink:href', 'woodenPlank.png') // Set the path to your PNG image
                 .attr('width', 350) // Set the width of the image
@@ -289,15 +306,15 @@ Hover for detailed information about each category's growth percentage.`)
                 } // Set font size (adjust as needed);
                 else {
                     svg.append('text')
-                    .text(textArray[i])
-                    .attr('fill', 'white') // Text color
-                    .attr('x', textPositions[i].x) // Adjust the X position based on your layout
-                    .attr('y', textPositions[i].y) // Adjust the Y position based on your layout
-                    .style('font-weight', 'bold') // Set font weight to bold
-                    .style('font-size', '18px')
-                    .attr('transform', 'rotate(' + textPositions[i].r + ',' + textPositions[i].x + ',' + textPositions[i].y + ')')
-                    .attr('stroke', 'black') // Border color
-                    .attr('stroke-width', '.2');
+                        .text(textArray[i])
+                        .attr('fill', 'white') // Text color
+                        .attr('x', textPositions[i].x) // Adjust the X position based on your layout
+                        .attr('y', textPositions[i].y) // Adjust the Y position based on your layout
+                        .style('font-weight', 'bold') // Set font weight to bold
+                        .style('font-size', '18px')
+                        .attr('transform', 'rotate(' + textPositions[i].r + ',' + textPositions[i].x + ',' + textPositions[i].y + ')')
+                        .attr('stroke', 'black') // Border color
+                        .attr('stroke-width', '.2');
                 }
             }
 
@@ -343,7 +360,7 @@ Hover for detailed information about each category's growth percentage.`)
                 }
             }
 
-            
+
 
             donutGroups.selectAll('path')
                 .data(d => pie(d.map(Math.abs))) // Use absolute values
